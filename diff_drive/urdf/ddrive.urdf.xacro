@@ -1,0 +1,182 @@
+<robot name="i_am_wheelyboy" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:property name="ddrive_yaml" value="$(find diff_drive)/config/ddrive.yaml"/>
+    <xacro:property name="ddrive_yaml_info" value="${load_yaml(ddrive_yaml)}"/>
+    <xacro:property name="L" value="${ddrive_yaml_info['Length']}"/>
+    <xacro:property name="W" value="${ddrive_yaml_info['Width']}"/>
+    <xacro:property name="H" value="${ddrive_yaml_info['Height']}"/>
+    <xacro:property name="WheelR" value="${ddrive_yaml_info['WheelR']}"/>
+    <xacro:property name="CasterR" value="${ddrive_yaml_info['CasterR']}"/>
+
+    <xacro:property name="PI" value="3.141592653"/>
+
+    <link name="base_link"/>
+
+    <joint name="base_body" type="fixed">
+        <parent link="base_link"/>
+        <child link="body"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <link name="body">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${L} ${W} ${H}"/>
+            </geometry>
+            <material name="dark_purple">
+                <color rgba="0.4 0.2 0.6 1"/>
+            </material>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${L} ${W} ${H}"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="1"/>
+          <inertia ixx="${((H*H+L*L)/12)}"  ixy="0"  ixz="0" iyy="${((W*W+L*L)/12)}" iyz="0" izz="${((W*W+H*H)/12)}" />
+        </inertial>
+    </link>
+
+    <joint name="body_Rwheel" type="continuous">
+        <parent link="body"/>
+        <child link="Rwheel"/>
+        <origin xyz="${(L/2)-0.1} 0.2 0" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <joint name="body_Lwheel" type="continuous">
+        <parent link="body"/>
+        <child link="Lwheel"/>
+        <origin xyz="${(L/2)-0.1} -0.2 0" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <link name="Rwheel">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 ${PI/2} ${PI/2}"/>
+            <geometry>
+                <cylinder length="0.1" radius="${WheelR}"/>
+            </geometry>
+            <material name="yellow">
+                <color rgba="1 1 0.2 1"/>
+            </material>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.1" radius="${WheelR}"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="1"/>
+          <inertia ixx="${(0.1*0.1/12) + (WheelR*WheelR/4)}" ixy="0" ixz="0"
+                     iyy="${(0.1*0.1/12) + (WheelR*WheelR/4)}" iyz="0"
+                     izz="${(WheelR*WheelR/2)}"/>
+        </inertial>
+    </link>
+
+    <link name="Lwheel">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 ${PI/2} ${PI/2}"/>
+            <geometry>
+                <cylinder length="0.1" radius="${WheelR}"/>
+            </geometry>
+            <material name="yellow">
+                <color rgba="1 1 0.2 1"/>
+            </material>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.1" radius="${WheelR}"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="1"/>
+          <inertia ixx="${(0.1*0.1/12) + (WheelR*WheelR/4)}" ixy="0" ixz="0"
+                     iyy="${(0.1*0.1/12) + (WheelR*WheelR/4)}" iyz="0"
+                     izz="${(WheelR*WheelR/2)}"/>
+        </inertial>
+    </link>
+
+    <joint name="body_Tcaster" type="fixed">
+        <parent link="body"/>
+        <child link="Tcaster"/>
+        <origin xyz="${-(L/2)+0.1} 0 0.1" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <joint name="body_Bcaster" type="fixed">
+        <parent link="body"/>
+        <child link="Bcaster"/>
+        <origin xyz="${-(L/2)+0.1} 0 -0.1" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <link name="Tcaster">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 ${PI/2} ${PI/2}"/>
+            <geometry>
+                <cylinder length="0.1" radius="${CasterR}"/>
+            </geometry>
+            <material name="yellow">
+                <color rgba="1 1 0.2 1"/>
+            </material>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.1" radius="${CasterR}"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="1"/>
+          <inertia ixx="${(0.1*0.1/12) + (CasterR*CasterR/4)}" ixy="0" ixz="0"
+                     iyy="${(0.1*0.1/12) + (CasterR*CasterR/4)}" iyz="0"
+                     izz="${(CasterR*CasterR/2)}"/>
+        </inertial>
+    </link>
+
+    <link name="Bcaster">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 ${PI/2} ${PI/2}"/>
+            <geometry>
+                <cylinder length="0.1" radius="${CasterR}"/>
+            </geometry>
+            <material name="yellow">
+                <color rgba="1 1 0.2 1"/>
+            </material>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.1" radius="${CasterR}"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="1"/>
+          <inertia ixx="${(0.1*0.1/12) + (WheelR*WheelR/4)}" ixy="0" ixz="0"
+                     iyy="${(0.1*0.1/12) + (WheelR*WheelR/4)}" iyz="0"
+                     izz="${(WheelR*WheelR/2)}"/>
+        </inertial>
+    </link>
+</robot>

@@ -1,4 +1,4 @@
-<robot name="wheelyboy">
+<robot name="wheelyboy" xmlns:xacro="http://ros.org/wiki/xacro">
 
     <xacro:property name="ddrive_yaml" value="$(find diff_drive)/config/ddrive.yaml"/>
     <xacro:property name="ddrive_yaml_info" value="${load_yaml(ddrive_yaml)}"/>
@@ -35,8 +35,8 @@
             <rosDebugLevel>na</rosDebugLevel>
             <alwaysOn>true</alwaysOn>
             <updateRate>100</updateRate>
-            <leftJoint>Lwheel</leftJoint>
-            <rightJoint>Rwheel</rightJoint>
+            <leftJoint>body_Lwheel</leftJoint>
+            <rightJoint>body_Rwheel</rightJoint>
             <wheelSeparation>${W+WheelW}</wheelSeparation>
             <wheelDiameter>${WheelR}</wheelDiameter>
             <wheelTorque>20</wheelTorque>

@@ -58,6 +58,11 @@ Visualization Manager:
       Enabled: true
       Links:
         All Links Enabled: true
+        Bcaster:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
@@ -68,6 +73,11 @@ Visualization Manager:
           Show Trail: false
           Value: true
         Rwheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Tcaster:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -91,7 +101,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: body
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -131,9 +141,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7903980016708374
+      Pitch: 0.6553982496261597
       Target Frame: <Fixed Frame>
-      Yaw: 0.9703978300094604
+      Yaw: 0.9403954744338989
     Saved: ~
 Window Geometry:
   Displays:

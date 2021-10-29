@@ -1,0 +1,55 @@
+<robot name="wheelyboy">
+
+    <xacro:property name="ddrive_yaml" value="$(find diff_drive)/config/ddrive.yaml"/>
+    <xacro:property name="ddrive_yaml_info" value="${load_yaml(ddrive_yaml)}"/>
+    <xacro:property name="L" value="${ddrive_yaml_info['body_length']}"/>
+    <xacro:property name="W" value="${ddrive_yaml_info['body_width']}"/>
+    <xacro:property name="H" value="${ddrive_yaml_info['body_height']}"/>
+    <xacro:property name="WheelR" value="${ddrive_yaml_info['wheel_radius']}"/>
+    <xacro:property name="WheelW" value="${ddrive_yaml_info['wheel_width']}"/>
+    <xacro:property name="CasterR" value="${ddrive_yaml_info['caster_radius']}"/>
+    <xacro:property name="CasterW" value="${ddrive_yaml_info['caster_width']}"/>
+
+    <gazebo reference="body">
+        <material>Gazebo/Wood</material>
+    </gazebo>
+
+    <gazebo reference="Rwheel">
+        <material>Gazebo/Wood</material>
+    </gazebo>
+
+    <gazebo reference="Lwheel">
+        <material>Gazebo/Wood</material>
+    </gazebo>
+
+    <gazebo reference="Tcaster">
+        <material>Gazebo/Wood</material>
+    </gazebo>
+
+    <gazebo reference="Bcaster">
+        <material>Gazebo/Wood</material>
+    </gazebo>
+
+    <gazebo>
+        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+            <rosDebugLevel>na</rosDebugLevel>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>100</updateRate>
+            <leftJoint>Lwheel</leftJoint>
+            <rightJoint>Rwheel</rightJoint>
+            <wheelSeparation>${W+WheelW}</wheelSeparation>
+            <wheelDiameter>${WheelR}</wheelDiameter>
+            <wheelTorque>20</wheelTorque>
+            <commandTopic>diff/cmd_vel</commandTopic>
+            <odometryTopic>diff/odom</odometryTopic>
+            <odometryFrame>odom</odometryFrame>
+            <robotBaseFrame>base_link</robotBaseFrame>
+            <publishWheelTF>false</publishWheelTF>
+            <publishOdomTF>true</publishOdomTF>
+            <publishWheelJointState>true</publishWheelJointState>
+            <wheelAcceleration>false</wheelAcceleration>
+            <odometrySource>world</odometrySource>
+            <publishTf>1</publishTf>
+        </plugin>
+    </gazebo>
+</robot>

@@ -1,5 +1,7 @@
-Length: 0.6
-Width: 0.3
-Height: 0.1
-WheelR: 0.15
-CasterR: 0.05
+body_length: 0.6
+body_width: 0.3
+body_height: 0.1
+wheel_radius: 0.15
+wheel_width: 0.1
+caster_radius: 0.05
+caster_width: 0.1

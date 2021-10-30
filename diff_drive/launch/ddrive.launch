@@ -9,4 +9,6 @@
     <param name="robot_description" command="$(find xacro)/xacro '$(find diff_drive)/urdf/ddrive.urdf.xacro'"/>
 
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -z 0.2 -Y 1.57 -model wheelyboy"/>
+
+    <node name="flip" pkg="diff_drive" type="flip"> </node>
 </launch>

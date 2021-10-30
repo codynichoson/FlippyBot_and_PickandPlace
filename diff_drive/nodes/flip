@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+""" 
+Publishes twist that will move a robot in a self-flipping pattern.
+
+PUBLISHERS:
+  + diff/cmd_vel Twist ~ the velocity of the turtlebot
+"""
+
+import rospy
+from geometry_msgs.msg import Twist, Vector3
+
+class flip:
+    def __init__(self):
+        # Initialize publisher
+        self.pub = rospy.Publisher("/diff/cmd_vel", Twist, queue_size = 10)
+
+        self.rate = rospy.Rate(100)
+
+        # Run loop
+        self.loopy()
+
+    def forward(self):
+        self.pub.publish(Twist(Vector3(x = 1, y = 0, z = 0), Vector3(x = 0, y = 0, z = 0)))
+
+    def pause(self):
+        self.pub.publish(Twist(Vector3(x = 0, y = 0, z = 0), Vector3(x = 0, y = 0, z = 0)))
+
+    def backward(self):
+        self.pub.publish(Twist(Vector3(x = -2, y = 0, z = 0), Vector3(x = 0, y = 0, z = 0)))
+
+    def publish(self, velocity, duration):
+        beginTime = rospy.Time.now()
+        secondsIWantToSendMessagesFor = rospy.Duration(duration)
+        endTime = beginTime + secondsIWantToSendMessagesFor
+
+        while rospy.Time.now() < endTime:
+            self.pub.publish(Twist(Vector3(x = velocity, y = 0, z = 0), Vector3(x = 0, y = 0, z = 0)))
+            self.rate.sleep()
+
+    def loopy(self):
+        """ Function containing while loop to continuously publish appropriate Twist messages to
+        cmd_vel
+
+        Args:
+           self : flip class
+
+        Returns:
+           None
+        """
+
+        while not rospy.is_shutdown():
+            self.publish(1,2)
+            self.publish(0,0.5)
+            self.publish(-1,2)
+            self.publish(0,0.5)
+
+            
+
+
+if __name__ == '__main__':
+    # Initialize node
+    rospy.init_node('flip')
+
+    # Call class
+    flip()
+
+    # Spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
+

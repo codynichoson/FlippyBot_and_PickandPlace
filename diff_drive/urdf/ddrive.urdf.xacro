@@ -82,7 +82,7 @@
 
         <inertial>
           <origin xyz="0 0 0" rpy="0 0 0"/>
-          <mass value="1"/>
+          <mass value="10"/>
           <inertia ixx="${(WheelW*WheelW/12) + (WheelR*WheelR/4)}" ixy="0" ixz="0"
                      iyy="${(WheelW*WheelW/12) + (WheelR*WheelR/4)}" iyz="0"
                      izz="${(WheelR*WheelR/2)}"/>
@@ -109,7 +109,7 @@
 
         <inertial>
           <origin xyz="0 0 0" rpy="0 0 0"/>
-          <mass value="1"/>
+          <mass value="10"/>
           <inertia ixx="${(WheelW*WheelW/12) + (WheelR*WheelR/4)}" ixy="0" ixz="0"
                      iyy="${(WheelW*WheelW/12) + (WheelR*WheelR/4)}" iyz="0"
                      izz="${(WheelR*WheelR/2)}"/>
@@ -150,7 +150,7 @@
 
         <inertial>
           <origin xyz="0 0 0" rpy="0 0 0"/>
-          <mass value="1"/>
+          <mass value="0.5"/>
           <inertia ixx="${(CasterW*CasterW/12) + (CasterR*CasterR/4)}" ixy="0" ixz="0"
                      iyy="${(CasterW*CasterW/12) + (CasterR*CasterR/4)}" iyz="0"
                      izz="${(CasterR*CasterR/2)}"/>
@@ -177,7 +177,7 @@
 
         <inertial>
           <origin xyz="0 0 0" rpy="0 0 0"/>
-          <mass value="1"/>
+          <mass value="0.5"/>
           <inertia ixx="${(CasterW*CasterW/12) + (CasterR*CasterR/4)}" ixy="0" ixz="0"
                      iyy="${(CasterW*CasterW/12) + (CasterR*CasterR/4)}" iyz="0"
                      izz="${(CasterR*CasterR/2)}"/>

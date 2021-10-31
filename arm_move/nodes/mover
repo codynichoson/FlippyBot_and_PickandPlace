@@ -1,0 +1,146 @@
+#!/usr/bin/env python
+""" 
+Adds a collision object representing the table to the planning scene
+Loads a list of waypoints from the parameter server (if waypoints don't exist, the list is empty)
+
+Reset service:
+    - takes position and orientation of realsense box and creates/moves the realsense box to the appropriate location
+    - moves the robot to its home position without hitting the box ('Home' is predefined by the SDK)
+    - takes a parameter that determines if the waypoints are cleared or not
+
+step service:
+    - moves the robot to a user-specified position and also a gripper state (open/closed)
+    - if the motion plan succeeds, it adds the position to the list of waypoints, storing it in parameter server, and executes the plan
+    - if motion plan fails, it's okay, use MoveItErrorCode to determine why
+
+follow service:
+    - has robot move to each waypoint in sequence
+    - follow should contain an option that determines if the cycle should be repeated or run just once
+
+
+SERVICES:
+  + reset ??? ~ does stuff
+
+
+
+
+  Easily specific place for arm to go and sequence for arm to follow
+
+  Services are way to interact with node (tell it to move to place, moves, then service returns)
+
+
+  cartesian coord adds extra restriction to path that you dont need. Not needed. No need to use cartesian path.
+
+  edit kinematics.yaml file to enable kinematics? It's in custom_ws
+  custom_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_moveit/config/kinematics.yaml
+  try commenting out last block and uncomment first block? positiononlyIK:true
+  This just changes inverse kinematics solver, probably not necessary but maybe?
+
+  set_position_target - supposed to set position of target without regard to orientation
+
+  waypoint stuff - use your step fucntion to set waypoints, then you save them. Allows you to interactively specify positions for the arm and playback those positions.
+  This is all done with the service and calling out positions manually.
+  Step service moves robot to waypoints. It also contains argument for opening/closing gripper
+
+  Follow is to playback every waypoint you set with step
+  
+
+"""
+
+import sys
+import copy
+import rospy
+from std_srvs.srv import Empty, EmptyResponse
+import moveit_commander
+import moveit_msgs.msg
+import geometry_msgs.msg
+from std_msgs.msg import String
+from std_srvs.srv import Empty, EmptyResponse
+from moveit_commander.conversions import pose_to_list
+#from interbotix_xs_modules.arm import InterbotixManipulatorXS
+
+
+class Mover:
+    def __init__(self):
+        moveit_commander.roscpp_initialize(sys.argv)
+
+        rospy.init_node('mover')
+
+        self.robot = moveit_commander.RobotCommander()
+
+        self.scene = moveit_commander.PlanningSceneInterface()
+
+        self.group_name = "interbotix_arm"
+        self.move_group = moveit_commander.MoveGroupCommander(self.group_name)
+
+        self.reset = rospy.Service("reset", Empty, self.reset_func) # Create reset service
+        self.step = rospy.Service("step", Empty, self.step_func) # Create step service
+        self.follow = rospy.Service("follow", Empty, self.follow_func) # Create follow service
+
+        self.box_name = ""
+
+        self.add_box()
+        pass
+
+    def wait_for_state_update(self, box_is_known=False, box_is_attached=False, timeout=4):
+        box_name = self.box_name
+        scene = self.scene
+
+        start = rospy.get_time()
+        seconds = rospy.get_time()
+        while (seconds - start < timeout) and not rospy.is_shutdown():
+            # Test if the box is in attached objects
+            attached_objects = scene.get_attached_objects([box_name])
+            is_attached = len(attached_objects.keys()) > 0
+
+            # Test if the box is in the scene.
+            # Note that attaching the box will remove it from known_objects
+            is_known = box_name in scene.get_known_object_names()
+
+            # Test if we are in the expected state
+            if (box_is_attached == is_attached) and (box_is_known == is_known):
+                return True
+
+            # Sleep so that we give other threads time on the processor
+            rospy.sleep(0.1)
+            seconds = rospy.get_time()
+
+        # If we exited the while loop without returning then we timed out
+        return False
+
+    def reset_func(self):
+        pass
+
+    def step_func(self):
+        pass
+
+    def follow_func(self):
+        pass
+
+    def add_table(self):
+        pass
+
+    def add_box(self, timeout=4):
+        rospy.sleep(3)
+
+        scene = self.scene
+        box_name = self.box_name
+        box_pose = geometry_msgs.msg.PoseStamped()
+        box_pose.header.frame_id = "world"
+        box_pose.pose.orientation.w = 1.0
+        box_pose.pose.position.x = 0
+        box_pose.pose.position.y = 0
+        box_pose.pose.position.z = -0.025
+        box_name = "box"
+        scene.add_box(box_name, box_pose, size=(1,1,0.05))
+        self.box_name = box_name
+
+        return self.wait_for_state_update(box_is_known=True, timeout=timeout)
+            
+
+if __name__ == '__main__':
+    # Instantiate class
+    Mover()
+
+    # Spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()

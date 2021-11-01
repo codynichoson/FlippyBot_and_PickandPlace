@@ -1,0 +1,6 @@
+# Pose of end effector
+geometry_msgs/Point coordinates
+bool gripper
+---
+moveit_msgs/MoveItErrorCodes error
+#int32 error

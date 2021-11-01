@@ -56,6 +56,7 @@ SERVICES:
 
 """
 
+#from _typeshed import StrOrBytesPath
 import sys
 import copy
 import rospy
@@ -65,6 +66,7 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 from std_msgs.msg import String
 from std_srvs.srv import Empty, EmptyResponse
+from arm_move.srv import step
 from moveit_commander.conversions import pose_to_list
 #from interbotix_xs_modules.arm import InterbotixManipulatorXS
 
@@ -76,6 +78,7 @@ class Mover:
         rospy.init_node('mover')
 
         self.robot = moveit_commander.RobotCommander()
+        self.move_gripper = moveit_commander.MoveGroupCommander("interbotix_gripper")
 
         self.scene = moveit_commander.PlanningSceneInterface()
 
@@ -106,7 +109,7 @@ class Mover:
 
         # Create services
         self.reset = rospy.Service("reset", Empty, self.reset_func) # Create reset service
-        self.step = rospy.Service("step", Empty, self.step_func) # Create step service
+        self.step = rospy.Service("step", step, self.step_func) # Create step service
         self.follow = rospy.Service("follow", Empty, self.follow_func) # Create follow service
 
         self.add_table()
@@ -151,17 +154,45 @@ class Mover:
         
         self.add_obstacle()
 
+        rospy.logerr(self.move_group.get_current_pose())
+
         #use name target --> Home, Sleep, Close, Open
         self.move_group.set_named_target("Sleep")
         self.move_group.go()
 
+        rospy.logerr(self.move_group.get_current_pose())
         
         return EmptyResponse()
 
     def step_func(self, req):
-        pass
+        #true/false for gripper open/close
+        x = req.coordinates.x
+        y = req.coordinates.y
+        z = req.coordinates.z
+        xyz = [x,y,z]
+        rospy.logerr(x)
+        rospy.logerr(y)
+        rospy.logerr(z)
+
+        if req.gripper == 'true':
+            self.move_gripper.set_named_target('Open')
+        elif req.gripper == 'false':
+            self.move_gripper.set_named_target('Closed')
+
+        self.move_group.set_position_target(xyz)
+
+        plan_output = self.move_group.plan()
+
+        self.move_group.execute(plan_output[1], wait='true')
+
+        self.move_group.go(wait='true')
+
+        #self.move_group.stop()
+
+        return plan_output[3]
 
     def follow_func(self, req):
+        #true/false for repeat
         pass
 
     def add_table(self):

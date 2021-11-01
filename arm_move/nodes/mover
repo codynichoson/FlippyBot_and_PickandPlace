@@ -164,32 +164,34 @@ class Mover:
         
         return EmptyResponse()
 
-    def step_func(self, req):
+    def step_func(self, data):
         #true/false for gripper open/close
-        x = req.coordinates.x
-        y = req.coordinates.y
-        z = req.coordinates.z
+        x = data.coordinates.x
+        y = data.coordinates.y
+        z = data.coordinates.z
         xyz = [x,y,z]
         rospy.logerr(x)
         rospy.logerr(y)
         rospy.logerr(z)
 
-        if req.gripper == 'true':
+        if data.gripper == True:
             self.move_gripper.set_named_target('Open')
-        elif req.gripper == 'false':
+        elif data.gripper == False:
             self.move_gripper.set_named_target('Closed')
+            
+        self.move_gripper.go(wait='true')
+        self.move_gripper.stop()
 
         self.move_group.set_position_target(xyz)
 
-        plan_output = self.move_group.plan()
+        success, traj_msg, planTime, err = self.move_group.plan()
 
-        self.move_group.execute(plan_output[1], wait='true')
+        self.move_group.execute(traj_msg, wait='true')
 
         self.move_group.go(wait='true')
+        self.move_group.stop()
 
-        #self.move_group.stop()
-
-        return plan_output[3]
+        return err
 
     def follow_func(self, req):
         #true/false for repeat

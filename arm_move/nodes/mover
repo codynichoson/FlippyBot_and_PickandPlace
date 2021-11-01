@@ -14,7 +14,7 @@ step service:
     - if motion plan fails, it's okay, use MoveItErrorCode to determine why
 
 follow service:
-    - has robot move to each waypoint in sequence
+    - has robot move to each waypoint in sequence   
     - follow should contain an option that determines if the cycle should be repeated or run just once
 
 
@@ -66,7 +66,7 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 from std_msgs.msg import String
 from std_srvs.srv import Empty, EmptyResponse
-from arm_move.srv import step
+from arm_move.srv import step, follow
 from moveit_commander.conversions import pose_to_list
 #from interbotix_xs_modules.arm import InterbotixManipulatorXS
 
@@ -106,11 +106,12 @@ class Mover:
 
         # Variables
         self.box_name = ""
+        self.waypoints = []
 
         # Create services
         self.reset = rospy.Service("reset", Empty, self.reset_func) # Create reset service
         self.step = rospy.Service("step", step, self.step_func) # Create step service
-        self.follow = rospy.Service("follow", Empty, self.follow_func) # Create follow service
+        self.follow = rospy.Service("follow", follow, self.follow_func) # Create follow service
 
         self.add_table()
 
@@ -157,7 +158,7 @@ class Mover:
         rospy.logerr(self.move_group.get_current_pose())
 
         #use name target --> Home, Sleep, Close, Open
-        self.move_group.set_named_target("Sleep")
+        self.move_group.set_named_target("Home")
         self.move_group.go()
 
         rospy.logerr(self.move_group.get_current_pose())
@@ -170,32 +171,60 @@ class Mover:
         y = data.coordinates.y
         z = data.coordinates.z
         xyz = [x,y,z]
-        rospy.logerr(x)
-        rospy.logerr(y)
-        rospy.logerr(z)
-
-        if data.gripper == True:
-            self.move_gripper.set_named_target('Open')
-        elif data.gripper == False:
-            self.move_gripper.set_named_target('Closed')
-            
-        self.move_gripper.go(wait='true')
-        self.move_gripper.stop()
 
         self.move_group.set_position_target(xyz)
-
         success, traj_msg, planTime, err = self.move_group.plan()
-
         self.move_group.execute(traj_msg, wait='true')
 
         self.move_group.go(wait='true')
         self.move_group.stop()
 
-        return err
+        if data.gripper == True:
+            self.move_gripper.set_named_target('Closed')
+        elif data.gripper == False:
+            self.move_gripper.set_named_target('Open')
+            
+        self.move_gripper.go(wait='true')
+        self.move_gripper.stop()
 
-    def follow_func(self, req):
+        # Save waypoints to parameter server if legal
+        if err.val == 1:
+            current_robot_pose = [xyz[0], xyz[1], xyz[2], data.gripper]
+            self.waypoints.append(current_robot_pose)
+            rospy.set_param('arm_waypoints', self.waypoints)
+        else:
+            rospy.logerr("Sorry, that pose is too extreme for me! I haven't been practicing my yoga. Try another pose.")
+
+        return err.val
+
+    def follow_func(self, repeat):
         #true/false for repeat
-        pass
+        follow_waypoints = rospy.get_param('arm_waypoints')
+        repeat = repeat.repeat
+
+        if repeat == True:
+            while True:
+                for wp in follow_waypoints:
+                    xyz = [wp[0], wp[1], wp[2]]
+                    grip = wp[3]
+                    self.move_group.set_position_target(xyz)
+                    success, traj_msg, planTime, err = self.move_group.plan()
+                    self.move_group.execute(traj_msg, wait='true')
+                    self.move_group.go(wait='true')
+                    self.move_group.stop()
+
+        elif repeat == False:
+            for wp in follow_waypoints:
+                xyz = [wp[0], wp[1], wp[2]]
+                grip = wp[3]
+                self.move_group.set_position_target(xyz)
+                success, traj_msg, planTime, err = self.move_group.plan()
+                self.move_group.execute(traj_msg, wait='true')
+                self.move_group.go(wait='true')
+                self.move_group.stop()
+        
+        return []
+
 
     def add_table(self):
         pass

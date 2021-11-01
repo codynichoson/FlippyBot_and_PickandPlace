@@ -52,6 +52,7 @@ find_package(catkin REQUIRED rospy std_msgs message_runtime message_generation g
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
+  follow.srv
   step.srv
 )
 

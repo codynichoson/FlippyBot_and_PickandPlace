@@ -2,5 +2,4 @@
 geometry_msgs/Point coordinates
 bool gripper
 ---
-moveit_msgs/MoveItErrorCodes error
-#int32 error
+int32 error

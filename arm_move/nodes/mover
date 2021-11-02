@@ -191,7 +191,7 @@ class Mover:
         if err.val == 1:
             current_robot_pose = [xyz[0], xyz[1], xyz[2], data.gripper]
             self.waypoints.append(current_robot_pose)
-            rospy.set_param('arm_waypoints', self.waypoints)
+            #rospy.set_param('arm_waypoints', self.waypoints)
         else:
             rospy.logerr("Sorry, that pose is too extreme for me! I haven't been practicing my yoga. Try another pose.")
 
@@ -199,7 +199,8 @@ class Mover:
 
     def follow_func(self, repeat):
         #true/false for repeat
-        follow_waypoints = rospy.get_param('arm_waypoints')
+        #follow_waypoints = rospy.get_param('arm_waypoints')
+        follow_waypoints = rospy.get_param('/waypoints')
         repeat = repeat.repeat
 
         if repeat == True:
@@ -213,6 +214,14 @@ class Mover:
                     self.move_group.go(wait='true')
                     self.move_group.stop()
 
+                    if grip == True:
+                        self.move_gripper.set_named_target('Closed')
+                    elif grip == False:
+                        self.move_gripper.set_named_target('Open')
+                    
+                    self.move_gripper.go(wait='true')
+                    self.move_gripper.stop()
+
         elif repeat == False:
             for wp in follow_waypoints:
                 xyz = [wp[0], wp[1], wp[2]]
@@ -222,15 +231,19 @@ class Mover:
                 self.move_group.execute(traj_msg, wait='true')
                 self.move_group.go(wait='true')
                 self.move_group.stop()
+
+                if grip == True:
+                    self.move_gripper.set_named_target('Closed')
+                elif grip == False:
+                    self.move_gripper.set_named_target('Open')
+                
+                self.move_gripper.go(wait='true')
+                self.move_gripper.stop()
         
         return []
 
-
-    def add_table(self):
-        pass
-
-    def add_table(self, timeout=4):
-        rospy.sleep(1)
+    def add_table(self, timeout=5):
+        rospy.sleep(2)
 
         scene = self.scene
         box_pose = geometry_msgs.msg.PoseStamped()
@@ -250,20 +263,17 @@ class Mover:
         obst_pose = geometry_msgs.msg.PoseStamped()
         obst_pose.header.frame_id = "world"
         obst_pose.pose.orientation.w = 1.0
-        obst_pose.pose.position.x = 0.15
-        obst_pose.pose.position.y = 0
-        obst_pose.pose.position.z = 0.045
+        obst_pose.pose.position.x = 0
+        obst_pose.pose.position.y = 0.135
+        obst_pose.pose.position.z = 0.025
         self.obst_name = "realsense"
-        scene.add_box(self.obst_name, obst_pose, size=(0.05,0.14,0.09))
+        scene.add_box(self.obst_name, obst_pose, size=(0.09,0.14,0.05))
 
         return self.wait_for_state_update(box_is_known=True, timeout=timeout)
-
 
 if __name__ == '__main__':
     # Instantiate class
     Mover()
-
-    
 
     # Spin() simply keeps python from exiting until this node is stopped
     rospy.spin()

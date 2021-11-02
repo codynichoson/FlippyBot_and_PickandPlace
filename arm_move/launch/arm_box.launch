@@ -13,8 +13,8 @@
   <arg name="use_gazebo"                        default="false"/>
   <arg name="use_actual"                        default="false"/>
   <arg name="use_fake"                          default="false"/>
-  <arg name="dof"                               default="5"/>
-  <arg name="world_name"                        default="$(find interbotix_xsarm_gazebo)/worlds/xsarm_gazebo.world"/>
+  <arg name="dof"                               default="4"/>
+  <arg name="world_name"                        default="$(find arm_move)/worlds/arm_world.world"/>
 
   <include if="$(arg use_gazebo)" file="$(find interbotix_xsarm_gazebo)/launch/xsarm_gazebo.launch">
     <arg name="robot_model"                       value="$(arg robot_model)"/>
@@ -25,6 +25,7 @@
     <arg name="external_urdf_loc"                 value="$(arg external_urdf_loc)"/>
     <arg name="world_name"                        value="$(arg world_name)"/>
     <arg name="use_trajectory_controllers"        value="true"/>
+    <arg name="paused"                            value="false"/>
   </include>
 
   <include if="$(arg use_actual)" file="$(find interbotix_xsarm_ros_control)/launch/xsarm_ros_control.launch">

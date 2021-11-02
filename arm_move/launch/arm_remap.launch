@@ -1,5 +1,0 @@
-<launch>    
-    <remap from="/attached_collision_object" to="/px100/attached_collision_object" />
-    <remap from="/collision_object" to="/px100/collision_object" />
-    <node name="mover" pkg="arm_move" type="mover" ns="px100" />
-</launch>

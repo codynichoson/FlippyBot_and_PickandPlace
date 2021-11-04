@@ -1,9 +1,9 @@
 # MoveIt! Manipulation Exercise
 ## About This Package
-#### Creator
+### Creator
 Cody Nichoson
 
-#### Overview 
+### Overview 
 This package is called `arm_move` and utilizes MoveIt! to control a PincherX 100 robot arm and perform simple motion planning capabilities in both simulation and the real world.
 
 ## Video Demonstration Links

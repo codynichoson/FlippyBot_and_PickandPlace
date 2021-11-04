@@ -3,23 +3,10 @@
 Adds a collision object representing the table to the planning scene
 Loads a list of waypoints from the parameter server (if waypoints don't exist, the list is empty)
 
-Reset service:
-    - takes position and orientation of realsense box and creates/moves the realsense box to the appropriate location
-    - moves the robot to its home position without hitting the box ('Home' is predefined by the SDK)
-    - takes a parameter that determines if the waypoints are cleared or not
-
-step service:
-    - moves the robot to a user-specified position and also a gripper state (open/closed)
-    - if the motion plan succeeds, it adds the position to the list of waypoints, storing it in parameter server, and executes the plan
-    - if motion plan fails, it's okay, use MoveItErrorCode to determine why
-
-follow service:
-    - has robot move to each waypoint in sequence   
-    - follow should contain an option that determines if the cycle should be repeated or run just once
-
-
 SERVICES:
-  + reset ??? ~ does stuff
+  + /px100/reset reset ~ Spawns an obstacle collision object in Rviz at a specified location; optionally clears waypoints on parameter server 
+  + /px100/step step ~ Moves robot arm to specified position and gripper state; adds successful positions to waypoints parameter; returns MoveItErroCode
+  + /px100/follow follow ~ Moves arm through iteration of waypoints specified in .yaml file; can perform once or loop
 """
 
 import sys
@@ -34,8 +21,11 @@ from moveit_commander.conversions import pose_to_list
 
 class Mover:
     def __init__(self):
+        """ Initialization for FigureEight class"""
+        # Initialize MoveIt Commander
         moveit_commander.roscpp_initialize(sys.argv)
 
+        # Initialize node
         rospy.init_node('mover')
 
         self.robot = moveit_commander.RobotCommander()
@@ -86,7 +76,7 @@ class Mover:
         # If we exited the while loop without returning then we timed out
         return False
 
-    def reset_func(self, data):
+    def reset_func(self, data, clear_wp):
         """
         Takes position and orientation of realsense box and creates/moves it
         to appropriate location.
@@ -95,21 +85,22 @@ class Mover:
 
         Take parameter that determines if waypoints are cleared or not.
         """
-        
-        self.add_obstacle()
+        x = data.box_pose.x
+        y = data.box_pose.y
+        clear_wp = clear_wp.clear_wp
 
-        rospy.logerr(self.move_group.get_current_pose())
-
-        #use name target --> Home, Sleep, Close, Open
+        self.add_obstacle(x, y)
         self.move_group.set_named_target("Home")
         self.move_group.go()
 
-        rospy.logerr(self.move_group.get_current_pose())
+        if clear_wp == True:
+            self.waypoints = []
+        else:
+            pass
         
         return resetResponse() 
 
     def step_func(self, data):
-        #true/false for gripper open/close
         x = data.coordinates.x
         y = data.coordinates.y
         z = data.coordinates.z
@@ -118,8 +109,6 @@ class Mover:
         self.move_group.set_position_target(xyz)
         success, traj_msg, planTime, err = self.move_group.plan()
         self.move_group.execute(traj_msg, wait='true')
-
-        self.move_group.go(wait='true')
         self.move_group.stop()
 
         if data.gripper == True:
@@ -134,15 +123,12 @@ class Mover:
         if err.val == 1:
             current_robot_pose = [xyz[0], xyz[1], xyz[2], data.gripper]
             self.waypoints.append(current_robot_pose)
-            #rospy.set_param('arm_waypoints', self.waypoints)
         else:
             rospy.logerr("Sorry, that pose is too extreme for me! I haven't been practicing my yoga. Try another pose.")
 
         return err.val
 
     def follow_func(self, repeat):
-        #true/false for repeat
-        #follow_waypoints = rospy.get_param('arm_waypoints')
         follow_waypoints = rospy.get_param('/waypoints')
         repeat = repeat.repeat
 
@@ -154,7 +140,6 @@ class Mover:
                     self.move_group.set_position_target(xyz)
                     success, traj_msg, planTime, err = self.move_group.plan()
                     self.move_group.execute(traj_msg, wait='true')
-                    self.move_group.go(wait='true')
                     self.move_group.stop()
 
                     if grip == True:
@@ -172,7 +157,7 @@ class Mover:
                 self.move_group.set_position_target(xyz)
                 success, traj_msg, planTime, err = self.move_group.plan()
                 self.move_group.execute(traj_msg, wait='true')
-                self.move_group.go(wait='true')
+
                 self.move_group.stop()
 
                 if grip == True:
@@ -200,17 +185,18 @@ class Mover:
 
         return self.wait_for_state_update(box_is_known=True, timeout=timeout)
 
-    def add_obstacle(self, timeout=4):
+    def add_obstacle(self, x, y, timeout=4):
 
         scene = self.scene
         obst_pose = geometry_msgs.msg.PoseStamped()
         obst_pose.header.frame_id = "world"
         obst_pose.pose.orientation.w = 1.0
-        obst_pose.pose.position.x = 0
-        obst_pose.pose.position.y = 0.135
-        obst_pose.pose.position.z = 0.025
+        obst_pose.pose.position.x = x
+        obst_pose.pose.position.y = y
+        obst_pose.pose.position.z = 0.07
         self.obst_name = "realsense"
-        scene.add_box(self.obst_name, obst_pose, size=(0.09,0.14,0.05))
+        #scene.add_box(self.obst_name, obst_pose, size=(0.09,0.14,0.05))
+        scene.add_box(self.obst_name, obst_pose, size=(0.05,0.09,0.14))
 
         return self.wait_for_state_update(box_is_known=True, timeout=timeout)
 

@@ -14,9 +14,9 @@ class TestNode(unittest.TestCase):
         rospy.wait_for_service("/px100/reset")
         resetProxy = rospy.ServiceProxy("/px100/reset", reset)
         reset_obj = reset()
-        reset_obj.x = 0.1
-        reset_obj.y = 0.1
-        reset_obj.z = 0.1
+        reset_obj.x = 0.4
+        reset_obj.y = 0.0
+        reset_obj.z = 0.07
         resetProxy.call(box_location = reset_obj)
 
     def test_step_crash(self):
@@ -29,8 +29,6 @@ class TestNode(unittest.TestCase):
         error = stepProxy.call(coordinates = step_obj, gripper = False)
         self.assertEqual(error.error, -1)
 
-
-
     def test_step_success(self):
         rospy.wait_for_service("/px100/step")
         stepProxy = rospy.ServiceProxy("/px100/step", step)
@@ -40,7 +38,6 @@ class TestNode(unittest.TestCase):
         step_obj.z = 0.1
         error = stepProxy.call(coordinates = step_obj, gripper = False)
         self.assertEqual(error.error, 1)
-
 
 if __name__ == "__main__":
     import rostest

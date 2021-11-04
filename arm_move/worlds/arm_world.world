@@ -191,25 +191,25 @@
       <pose>0.047544 0.065395 0.5 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>521 283000000</sim_time>
-      <real_time>9 179320408</real_time>
-      <wall_time>1635813715 685437926</wall_time>
-      <iterations>9162</iterations>
+      <sim_time>537 2000000</sim_time>
+      <real_time>16 71296331</real_time>
+      <wall_time>1635985029 894798226</wall_time>
+      <iterations>15719</iterations>
       <model name='RealSense_Box_1'>
-        <pose>-0 0.135 0.024991 0 6e-06 1.57002</pose>
+        <pose>0 0.135 0.025 0 -2e-06 1.57001</pose>
         <scale>1 1 1</scale>
         <link name='link_2'>
-          <pose>-0 0.135 0.024991 0 6e-06 1.57002</pose>
+          <pose>0 0.135 0.025 0 -2e-06 1.57001</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 -9.8 0 -0 0</acceleration>
-          <wrench>0 0 -0.98 0 -0 0</wrench>
+          <acceleration>-0.004168 -0.100274 -0.194156 -2.26386 -0.098481 0.00015</acceleration>
+          <wrench>-0.000417 -0.010027 -0.019416 0 -0 0</wrench>
         </link>
       </model>
       <model name='RedBlock1'>
-        <pose>6.1e-05 -0.250099 0.02 3e-06 -0 -0.000975</pose>
+        <pose>0 -0.25 0.03 0.000246 -0 0.000722</pose>
         <scale>1 1 1</scale>
         <link name='link_1'>
-          <pose>6.1e-05 -0.250099 0.02 3e-06 -0 -0.000975</pose>
+          <pose>0 -0.25 0.03 0.000246 -0 0.000722</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -231,7 +231,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>0.766643 -0.565395 0.712152 -0 0.642525 2.38468</pose>
+        <pose>0.865648 -0.536384 0.652907 0 0.586525 2.53268</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -259,7 +259,7 @@
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.03 0.03 0.04</size>
+              <size>0.03 0.03 0.06</size>
             </box>
           </geometry>
           <material>
@@ -285,7 +285,7 @@
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.03 0.03 0.04</size>
+              <size>0.03 0.03 0.06</size>
             </box>
           </geometry>
           <surface>
@@ -337,7 +337,7 @@
       </link>
       <static>0</static>
       <allow_auto_disable>1</allow_auto_disable>
-      <pose>-0.000145 -0.250347 0.019996 0.000246 -1e-06 0.000721</pose>
+      <pose>6.5e-05 -0.250096 0.019995 -0.000133 0.000194 -0.001024</pose>
     </model>
   </world>
 </sdf>

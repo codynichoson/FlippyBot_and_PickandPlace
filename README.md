@@ -59,11 +59,11 @@ rosservice call /px100/step "coordinates:
   z: 0.25
 gripper: true" 
 ```
-3. Finally, to have the robot arm iterate through a series of waypoints, call the `follow` service by typing the command `rosservice call /px100/follow`
-and hitting the `Tab` button twice to auto-complete the input format. This input will only require an boolean determining if you want the robot
-to loop through its various waypoints repeatedly or only once. (repeat = true to repeat, repeat = false for only once). An example input is:
+3. Finally, to have the robot arm iterate through a series of waypoints, call the `follow` service by typing the command `rosservice call /px100/follow` and hitting the `Tab` button twice to auto-complete the input format. This input takes two boolean values that determine how the robot will iterate through waypoints. To loop through one waypoint pattern continuously, set `repeat = True`. To loop through only once, set `repeat = False`. In addition, the argument `custom` allows you choose between a preset list of waypoints (located in the `.yaml` file) and custom waypoints (appended everytime the `step` service is called). Setting `custom = True` will use the waypoints from the `step` service, and setting `custom = False` will use waypoints from the `.yaml` file. An example input is:
 ```
-rosservice call /px100/follow "repeat: false"
+rosservice call /px100/follow "repeat: false
+custom: true" 
+
 ```
 
 #### Configuration Changes

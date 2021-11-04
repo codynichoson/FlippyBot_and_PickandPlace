@@ -1,3 +1,2 @@
-# coordinates of box
-geometry_msgs/Pose box_pose
----
+geometry_msgs/Point box_pose # coordinates of box
+bool clear_wp # clear waypoints

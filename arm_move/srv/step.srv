@@ -1,5 +1,4 @@
-# Pose of end effector
-geometry_msgs/Point coordinates
-bool gripper
+geometry_msgs/Point coordinates # pose of end effector
+bool gripper # gripper open/close
 ---
 int32 error

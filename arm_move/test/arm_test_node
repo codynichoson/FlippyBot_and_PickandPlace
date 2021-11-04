@@ -1,5 +1,12 @@
 #!/usr/bin/env python
-""" Create a unittest node that tests out the mover"""
+""" 
+Tests path planning ability for two cases; one where the goal position is impossible (inside table),
+and one where the goal position is possible.
+
+SERVICES:
+  + /px100/reset (proxy) reset ~ Spawns an obstacle collision object in Rviz at a specified location; optionally clears waypoints on parameter server 
+  + /px100/step (proxy) step ~ Moves robot arm to specified position and gripper state; adds successful positions to waypoints parameter; returns MoveItErroCode
+"""
 
 import unittest
 import rospy
@@ -8,40 +15,86 @@ from geometry_msgs.msg import Point
 
 class TestNode(unittest.TestCase):
     def __init__(self, *args):
+        """ Initialization for TestNode class."""
         super(TestNode, self).__init__(*args)
         rospy.init_node("arm_test_node")
 
+        # Wait for service to exist
         rospy.wait_for_service("/px100/reset")
+
+        # Set proxy service for reset
         resetProxy = rospy.ServiceProxy("/px100/reset", reset)
+
+        # Populate arguments for service call
         reset_obj = reset()
         reset_obj.x = 0.4
         reset_obj.y = 0.0
         reset_obj.z = 0.07
-        resetProxy.call(box_location = reset_obj)
+
+        # Call service
+        resetProxy.call(box_pose = reset_obj)
 
     def test_step_crash(self):
+        """
+        Tests path planning for goal position in impossible area (inside table)
+
+        Args:
+           self : TestNode class
+
+        Returns:
+           None
+        """
+        # Wait for service to exist
         rospy.wait_for_service("/px100/step")
+
+        # Set proxy service for step
         stepProxy = rospy.ServiceProxy("/px100/step", step)
+
+        # Populate arguments for service call
         step_obj = step()
         step_obj.x = 0.1
         step_obj.y = 0.1
         step_obj.z = -0.2
+
+        # Call service
         error = stepProxy.call(coordinates = step_obj, gripper = False)
+
+        # Test to see if error code matches expectation (crash)
         self.assertEqual(error.error, -1)
 
     def test_step_success(self):
+        """
+        Tests path planning for goal position in allowable area
+
+        Args:
+           self : TestNode class
+
+        Returns:
+           None
+        """
+
+        # Wait for service to exist
         rospy.wait_for_service("/px100/step")
+
+        # Set proxy service for step
         stepProxy = rospy.ServiceProxy("/px100/step", step)
+
+        # Populate arguments for service call
         step_obj = step()
         step_obj.x = 0.1
         step_obj.y = 0.1
         step_obj.z = 0.1
+
+        # Call service
         error = stepProxy.call(coordinates = step_obj, gripper = False)
+
+        # Test to see if error code matches expectation (success)
         self.assertEqual(error.error, 1)
 
 if __name__ == "__main__":
     import rostest
     rostest.rosrun('arm_move', "arm_test_node", TestNode)
 
+    # Run the test functions
     TestNode.test_step_crash()
     TestNode.test_step_success()

@@ -3,6 +3,9 @@
 Adds a collision object representing the table to the planning scene
 Loads a list of waypoints from the parameter server (if waypoints don't exist, the list is empty)
 
+PUBLISHERS:
+  + /move_group/display_planned_path moveit_msgs.msg.DisplayTrajectory ~ the velocity of the turtlesim
+
 SERVICES:
   + /px100/reset reset ~ Spawns an obstacle collision object in Rviz at a specified location; optionally clears waypoints on parameter server 
   + /px100/step step ~ Moves robot arm to specified position and gripper state; adds successful positions to waypoints parameter; returns MoveItErroCode
@@ -18,25 +21,20 @@ import geometry_msgs.msg
 from arm_move.srv import reset, step, follow, resetResponse
 from moveit_commander.conversions import pose_to_list
 
-
 class Mover:
     def __init__(self):
-        """ Initialization for FigureEight class"""
+        """ Initialization for Mover class."""
         # Initialize MoveIt Commander
         moveit_commander.roscpp_initialize(sys.argv)
 
         # Initialize node
         rospy.init_node('mover')
 
-        self.robot = moveit_commander.RobotCommander()
-        self.move_gripper = moveit_commander.MoveGroupCommander("interbotix_gripper")
-
+        # Initialize MoveIt Commander things
         self.scene = moveit_commander.PlanningSceneInterface()
-
+        self.move_gripper = moveit_commander.MoveGroupCommander("interbotix_gripper")
         self.group_name = "interbotix_arm"
         self.move_group = moveit_commander.MoveGroupCommander(self.group_name)
-
-        self.display_trajectory_publisher = rospy.Publisher("/move_group/display_planned_path",moveit_msgs.msg.DisplayTrajectory,queue_size=20)
 
         # Variables
         self.box_name = ""
@@ -47,10 +45,14 @@ class Mover:
         self.step = rospy.Service("step", step, self.step_func) # Create step service
         self.follow = rospy.Service("follow", follow, self.follow_func) # Create follow service
 
+        # Add table collision object to Rviz
         self.add_table()
 
 
     def wait_for_state_update(self, box_is_known=False, box_is_attached=False, timeout=4):
+        """
+        This function was included with the MoveIt collision object creation example.
+        """
         box_name = self.box_name
         scene = self.scene
 
@@ -76,18 +78,21 @@ class Mover:
         # If we exited the while loop without returning then we timed out
         return False
 
-    def reset_func(self, data, clear_wp):
+    def reset_func(self, data):
         """
-        Takes position and orientation of realsense box and creates/moves it
-        to appropriate location.
+        Spawns collision box object into Rviz; moves robot to 'Home' position;
+        clears waypoint param if desired.
 
-        Move robot to pre-defined 'home' position without hitting box.
+        Args:
+           self : Mover class
+           data : arguments given via service call (box position and waypoint clearing status)
 
-        Take parameter that determines if waypoints are cleared or not.
+        Returns:
+           resetResponse
         """
         x = data.box_pose.x
         y = data.box_pose.y
-        clear_wp = clear_wp.clear_wp
+        clear_wp = data.clear_wp
 
         self.add_obstacle(x, y)
         self.move_group.set_named_target("Home")
@@ -101,21 +106,36 @@ class Mover:
         return resetResponse() 
 
     def step_func(self, data):
+        """
+        Moves robot to inputted position and gripper state.
+
+        Args:
+           self : Mover class
+           data : arguments given via service call (end-effector position and gripper state)
+           Gripper closes if true, opens if false.
+
+        Returns:
+           err.val : MoveItErrorCode (1 for successful motion plan, -1 for failed motion plan)
+        """
+        # Retrieve position data from argument
         x = data.coordinates.x
         y = data.coordinates.y
         z = data.coordinates.z
         xyz = [x,y,z]
 
+        # Set position target, plan path, and move robot
         self.move_group.set_position_target(xyz)
         success, traj_msg, planTime, err = self.move_group.plan()
         self.move_group.execute(traj_msg, wait='true')
         self.move_group.stop()
 
+        # If True, close gripper, if False, open gripper
         if data.gripper == True:
             self.move_gripper.set_named_target('Closed')
         elif data.gripper == False:
             self.move_gripper.set_named_target('Open')
-            
+        
+        # Move gripper
         self.move_gripper.go(wait='true')
         self.move_gripper.stop()
 
@@ -129,9 +149,23 @@ class Mover:
         return err.val
 
     def follow_func(self, repeat):
+        """
+        Moves robot iteratively through waypoints specified in .yaml file.
+
+        Args:
+           self : Mover class
+           data : arguments given via service call (boolean determining if pattern should loop)
+
+        Returns:
+           Empty list []
+        """
+        # Retrieve waypoints from .yaml file
         follow_waypoints = rospy.get_param('/waypoints')
+
+        # Retrieve loop status
         repeat = repeat.repeat
 
+        # If loop desired, continue to loop
         if repeat == True:
             while True:
                 for wp in follow_waypoints:
@@ -150,6 +184,7 @@ class Mover:
                     self.move_gripper.go(wait='true')
                     self.move_gripper.stop()
 
+        # If loop not desired, perform once
         elif repeat == False:
             for wp in follow_waypoints:
                 xyz = [wp[0], wp[1], wp[2]]
@@ -171,8 +206,20 @@ class Mover:
         return []
 
     def add_table(self, timeout=5):
+        """
+        Adds table collision object to Rviz.
+
+        Args:
+           self : Mover class
+           timeout : sets timeout for table
+
+        Returns:
+           self.wait_for_state_update(box_is_known=True, timeout=timeout)
+        """
+        # Sleep to allow Rviz to load before adding object
         rospy.sleep(2)
 
+        # Initialize table object
         scene = self.scene
         box_pose = geometry_msgs.msg.PoseStamped()
         box_pose.header.frame_id = "world"
@@ -181,12 +228,27 @@ class Mover:
         box_pose.pose.position.y = 0
         box_pose.pose.position.z = -0.025
         self.box_name = "table"
+
+        # Add table object to Rviz
         scene.add_box(self.box_name, box_pose, size=(1,1,0.05))
 
         return self.wait_for_state_update(box_is_known=True, timeout=timeout)
 
     def add_obstacle(self, x, y, timeout=4):
+        """
+        Adds collision object to Rviz.
 
+        Args:
+           self : Mover class
+           x: x position of collision object on table
+           y: y position of collision object on table
+           timeout : sets timeout for table
+
+        Returns:
+           self.wait_for_state_update(box_is_known=True, timeout=timeout)
+        """
+
+        # Initialize obstacle object
         scene = self.scene
         obst_pose = geometry_msgs.msg.PoseStamped()
         obst_pose.header.frame_id = "world"
@@ -195,7 +257,8 @@ class Mover:
         obst_pose.pose.position.y = y
         obst_pose.pose.position.z = 0.07
         self.obst_name = "realsense"
-        #scene.add_box(self.obst_name, obst_pose, size=(0.09,0.14,0.05))
+
+        # Add obstacle object to Rviz
         scene.add_box(self.obst_name, obst_pose, size=(0.05,0.09,0.14))
 
         return self.wait_for_state_update(box_is_known=True, timeout=timeout)

@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+""" Create a unittest node that tests out the mover"""
+
+import unittest
+import rospy
+from arm_move.srv import reset, step, follow
+from geometry_msgs.msg import Point
+
+class TestNode(unittest.TestCase):
+    def __init__(self, *args):
+        super(TestNode, self).__init__(*args)
+        rospy.init_node("arm_test_node")
+
+        rospy.wait_for_service("/px100/reset")
+        resetProxy = rospy.ServiceProxy("/px100/reset", reset)
+        reset_obj = reset()
+        reset_obj.x = 0.1
+        reset_obj.y = 0.1
+        reset_obj.z = 0.1
+        resetProxy.call(box_location = reset_obj)
+
+    def test_step_crash(self):
+        rospy.wait_for_service("/px100/step")
+        stepProxy = rospy.ServiceProxy("/px100/step", step)
+        step_obj = step()
+        step_obj.x = 0.1
+        step_obj.y = 0.1
+        step_obj.z = -0.2
+        error = stepProxy.call(coordinates = step_obj, gripper = False)
+        self.assertEqual(error.error, -1)
+
+
+
+    def test_step_success(self):
+        rospy.wait_for_service("/px100/step")
+        stepProxy = rospy.ServiceProxy("/px100/step", step)
+        step_obj = step()
+        step_obj.x = 0.1
+        step_obj.y = 0.1
+        step_obj.z = 0.1
+        error = stepProxy.call(coordinates = step_obj, gripper = False)
+        self.assertEqual(error.error, 1)
+
+
+if __name__ == "__main__":
+    import rostest
+    rostest.rosrun('arm_move', "arm_test_node", TestNode)
+
+    TestNode.test_step_crash()
+    TestNode.test_step_success()

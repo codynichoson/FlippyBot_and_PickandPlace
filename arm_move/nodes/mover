@@ -20,55 +20,16 @@ follow service:
 
 SERVICES:
   + reset ??? ~ does stuff
-
-
-
-
-  Easily specific place for arm to go and sequence for arm to follow
-
-  Services are way to interact with node (tell it to move to place, moves, then service returns)
-
-
-  cartesian coord adds extra restriction to path that you dont need. Not needed. No need to use cartesian path.
-
-  edit kinematics.yaml file to enable kinematics? It's in custom_ws
-  custom_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_moveit/config/kinematics.yaml
-  try commenting out last block and uncomment first block? positiononlyIK:true
-  This just changes inverse kinematics solver, probably not necessary but maybe?
-
-  set_position_target - supposed to set position of target without regard to orientation
-
-  waypoint stuff - use your step fucntion to set waypoints, then you save them. Allows you to interactively specify positions for the arm and playback those positions.
-  This is all done with the service and calling out positions manually.
-  Step service moves robot to waypoints. It also contains argument for opening/closing gripper
-
-  Follow is to playback every waypoint you set with step
-
-
-
-  MOVING ARM
-
-  move_group.set_named_target = 'Home'
-  move_group.go('Home')
-
-  Clear something after moving?
-  
-
 """
 
-#from _typeshed import StrOrBytesPath
 import sys
-import copy
 import rospy
-from std_srvs.srv import Empty, EmptyResponse
+from std_srvs.srv import EmptyResponse
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
-from std_msgs.msg import String
-from std_srvs.srv import Empty, EmptyResponse
-from arm_move.srv import step, follow
+from arm_move.srv import reset, step, follow, resetResponse
 from moveit_commander.conversions import pose_to_list
-#from interbotix_xs_modules.arm import InterbotixManipulatorXS
 
 
 class Mover:
@@ -87,29 +48,12 @@ class Mover:
 
         self.display_trajectory_publisher = rospy.Publisher("/move_group/display_planned_path",moveit_msgs.msg.DisplayTrajectory,queue_size=20)
 
-        # We can get the name of the reference frame for this robot:
-        self.planning_frame = self.move_group.get_planning_frame()
-        print("============ Planning frame: %s" % self.planning_frame)
-
-        # We can also print the name of the end-effector link for this group:
-        self.eef_link = self.move_group.get_end_effector_link()
-        print("============ End effector link: %s" % self.eef_link)
-
-        # We can get a list of all the groups in the robot:
-        self.group_names = self.robot.get_group_names()
-        print("============ Available Planning Groups:", self.robot.get_group_names())
-
-        # Sometimes for debugging it is useful to print the entire state of the robot:
-        print("============ Printing robot state")
-        print(self.robot.get_current_state())
-        print("")
-
         # Variables
         self.box_name = ""
         self.waypoints = []
 
         # Create services
-        self.reset = rospy.Service("reset", Empty, self.reset_func) # Create reset service
+        self.reset = rospy.Service("reset", reset, self.reset_func) # Create reset service
         self.step = rospy.Service("step", step, self.step_func) # Create step service
         self.follow = rospy.Service("follow", follow, self.follow_func) # Create follow service
 
@@ -142,7 +86,7 @@ class Mover:
         # If we exited the while loop without returning then we timed out
         return False
 
-    def reset_func(self, req):
+    def reset_func(self, data):
         """
         Takes position and orientation of realsense box and creates/moves it
         to appropriate location.
@@ -151,7 +95,6 @@ class Mover:
 
         Take parameter that determines if waypoints are cleared or not.
         """
-        #realsense_pose = self.scene.get_object_poses([self.obst_name])
         
         self.add_obstacle()
 
@@ -163,7 +106,7 @@ class Mover:
 
         rospy.logerr(self.move_group.get_current_pose())
         
-        return EmptyResponse()
+        return resetResponse() 
 
     def step_func(self, data):
         #true/false for gripper open/close

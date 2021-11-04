@@ -53,6 +53,7 @@ find_package(catkin REQUIRED rospy std_msgs message_runtime message_generation g
 add_service_files(
   FILES
   follow.srv
+  reset.srv
   step.srv
 )
 
@@ -160,6 +161,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   nodes/mover
+  test/arm_test_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -203,3 +205,10 @@ catkin_install_python(PROGRAMS
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if (CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_rostest(test/arm.test)
+    # ## Add folders to be run by python nosetests
+    # catkin_add_nosetests(test)
+endif()

@@ -62,6 +62,8 @@
   <exec_depend>interbotix_xsarm_ros_control</exec_depend>
   <exec_depend>interbotix_xsarm_descriptions</exec_depend>
 
+  <test_depend>rostest</test_depend>
+
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->

@@ -148,7 +148,7 @@ class Mover:
 
         return err.val
 
-    def follow_func(self, repeat):
+    def follow_func(self, data):
         """
         Moves robot iteratively through waypoints specified in .yaml file.
 
@@ -159,12 +159,16 @@ class Mover:
         Returns:
            Empty list []
         """
-        # Retrieve waypoints from .yaml file
-        follow_waypoints = rospy.get_param('/waypoints')
+        custom = data.custom
+        if custom == True:
+            follow_waypoints = self.waypoints
+        elif custom == False:
+            # Retrieve waypoints from .yaml file
+            follow_waypoints = rospy.get_param('/waypoints')
 
         # Retrieve loop status
-        repeat = repeat.repeat
-
+        repeat = data.repeat
+        
         # If loop desired, continue to loop
         if repeat == True:
             while True:

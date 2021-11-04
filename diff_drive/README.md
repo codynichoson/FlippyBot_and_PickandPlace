@@ -1,9 +1,9 @@
 # Flipping URDF Robot
 ## About This Package
-#### Creator
+### Creator
 Cody Nichoson
 
-#### Overview 
+### Overview 
 This  package is called `diff_drive` and serves to create, simulate, and control a custom robot model created with URDF so that it performs flips in Gazebo.
 
 ## Video Demonstration Links

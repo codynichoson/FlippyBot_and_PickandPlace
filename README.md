@@ -14,14 +14,14 @@ For usage instructions and further information for each package, please consult 
 #### Flipping Robot in Gazebo
 https://youtu.be/s7BYN_Po0b0
 
-#### Simulated PincherX 100 Picking an Object Up (Obstacle Location 1)
+#### Simulated PincherX 100 Picking an Object Up (Obstacle as platform)
 https://youtu.be/jtutWcg3htY
 
-#### Real PincherX 100 Picking an Object Up (Obstacle Location 1)
+#### Real PincherX 100 Picking an Object Up (Obstacle as platform)
 https://youtu.be/lrAWV9bWFnM
 
-#### Simulated PincherX 100 Picking an Object Up (Obstacle Location 2)
+#### Simulated PincherX 100 Picking an Object Up (Obstacle in front of arm)
 https://youtu.be/1dNAkgyUx3Q
 
-#### Real PincherX 100 Picking an Object Up (Obstacle Location 2)
+#### Real PincherX 100 Picking an Object Up (Obstacle in front of arm)
 https://youtu.be/2Zd_sR6jxTw

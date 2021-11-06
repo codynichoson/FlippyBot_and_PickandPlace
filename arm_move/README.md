@@ -14,6 +14,9 @@ https://youtu.be/jtutWcg3htY
 #### Real PincherX 100 Picking an Object Up (Obstacle Location 1)
 https://youtu.be/lrAWV9bWFnM
 
+#### Simulated PincherX 100 Picking an Object Up (Obstacle Location 2)
+https://youtu.be/1dNAkgyUx3Q
+
 #### Real PincherX 100 Picking an Object Up (Obstacle Location 2)
 https://youtu.be/2Zd_sR6jxTw
 

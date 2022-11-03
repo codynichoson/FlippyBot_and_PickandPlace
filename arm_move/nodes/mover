@@ -48,10 +48,10 @@ class Mover:
         # Add table collision object to Rviz
         self.add_table()
 
-
     def wait_for_state_update(self, box_is_known=False, box_is_attached=False, timeout=4):
         """
-        This function was included with the MoveIt collision object creation example.
+        Function for to ensure collision object is added correctly. Given in MoveIt collision
+        object example.
         """
         box_name = self.box_name
         scene = self.scene
@@ -64,7 +64,6 @@ class Mover:
             is_attached = len(attached_objects.keys()) > 0
 
             # Test if the box is in the scene.
-            # Note that attaching the box will remove it from known_objects
             is_known = box_name in scene.get_known_object_names()
 
             # Test if we are in the expected state

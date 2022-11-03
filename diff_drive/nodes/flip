@@ -45,9 +45,6 @@ class flip:
             self.publish(-1,2)
             self.publish(0,0.5)
 
-            
-
-
 if __name__ == '__main__':
     # Initialize node
     rospy.init_node('flip')
